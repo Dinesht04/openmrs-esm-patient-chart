@@ -26,10 +26,8 @@ function VisitDetailOverviewComponent({ patientUuid }: VisitOverviewComponentPro
   const optimizedData: optimizedData = data?.data;
 
   const { t } = useTranslation();
-  const { visits, error, hasMore, isLoading, isValidating, mutateVisits, setSize, size } =
-    useInfiniteVisits(patientUuid);
+  const { visits, error, hasMore, isLoading, isValidating, mutate, loadMore } = useInfiniteVisits(patientUuid);
   const { showAllEncountersTab } = useConfig<ChartConfig>();
-  const shouldLoadMore = size !== visits?.length;
 
   const visitsWithEncounters = visits
     ?.filter((visit) => visit?.encounters?.length)
@@ -155,7 +153,7 @@ function VisitDetailOverviewComponent({ patientUuid }: VisitOverviewComponentPro
                 <ErrorState headerTitle={t('visits', 'visits')} error={error} />
               ) : visits?.length ? (
                 <VisitsTable
-                  mutateVisits={mutateVisits}
+                  mutateVisits={mutate}
                   visits={visitsWithEncounters}
                   showAllEncounters
                   patientUuid={patientUuid}
@@ -174,12 +172,8 @@ function VisitDetailOverviewComponent({ patientUuid }: VisitOverviewComponentPro
       </Tabs>
 
       {hasMore ? (
-        <Button
-          className={styles.loadMoreButton}
-          disabled={isValidating && shouldLoadMore}
-          onClick={() => setSize(size + 1)}
-        >
-          {isValidating && shouldLoadMore ? (
+        <Button className={styles.loadMoreButton} disabled={!hasMore} onClick={loadMore}>
+          {isValidating ? (
             <InlineLoading description={`${t('loading', 'Loading')} ...`} role="progressbar" />
           ) : (
             t('loadMore', 'Load more')
